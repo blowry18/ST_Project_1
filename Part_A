@@ -1,0 +1,90 @@
+##OA3602 Homework 2
+## Author: Colton Kawamura
+## Date: 12APR2019
+
+#--------------------------Part a---------------------------------------------------
+
+#Define given information
+nreps <- 10000
+R <- .85
+r_rocket <- R
+pdam <- .9
+PD <- NULL
+
+#Munition Coordinates
+wx = rep(c(1,2,3,4,5,6,7),5)
+wy = c(rep(1,7),rep(2,7),rep(3,7),rep(4,7),rep(5,7))
+
+#Begin Monte Carlo Simulation for "nreps" of targets with a uniform distrubtion
+for (reps in 1:nreps) {
+  xtgt <- 8*runif(1); ytgt <- 6*runif(1) #Creates x,y coordinates for targets
+  dist <- sqrt((wx-xtgt)^2+(wy-ytgt)^2)
+  n = sum(dist<=R)    #number of disks covering the current sample target
+  pd <- 1-(1-pdam)^n  #prob. of 1 or more of the n disks neutralizing the target
+  PD <- c(PD,pd)        #update the PD vector
+}
+
+#Calculate the 99% Confidence Interval
+PD_mean <- mean(PD);PD_mean
+PD_mean_error <- qnorm(.995)*sd(PD)/sqrt(nreps); PD_mean_error
+
+#Plot rocket positions with .85 m*100 coverage
+rockets_x <- c(1,2,3,4,5,6,7)
+rockets_y <- c(1,2,3,4,5)
+
+plot(c(1,1,1,1,1), rockets_y, xlim=c(0,8),ylim=c(-1,6))
+
+text(4,-.5, paste0("99% CI= ", round(PD_mean, 3), " +/- ", round(PD_mean_error, 4)))
+
+points(c(2,2,2,2,2), rockets_y)
+points(c(3,3,3,3,3), rockets_y)
+points(c(4,4,4,4,4), rockets_y)
+points(c(5,5,5,5,5), rockets_y)
+points(c(6,6,6,6,6), rockets_y)
+points(c(7,7,7,7,7), rockets_y)
+
+draw.circle(1,1,radius=r_rocket, border="red")
+draw.circle(1,2,radius=r_rocket, border="red")
+draw.circle(1,3,radius=r_rocket, border="red")
+draw.circle(1,4,radius=r_rocket, border="red")
+draw.circle(1,5,radius=r_rocket, border="red")
+
+draw.circle(2,1,radius=r_rocket, border="red")
+draw.circle(2,2,radius=r_rocket, border="red")
+draw.circle(2,3,radius=r_rocket, border="red")
+draw.circle(2,4,radius=r_rocket, border="red")
+draw.circle(2,5,radius=r_rocket, border="red")
+
+draw.circle(3,1,radius=r_rocket, border="red")
+draw.circle(3,2,radius=r_rocket, border="red")
+draw.circle(3,3,radius=r_rocket, border="red")
+draw.circle(3,4,radius=r_rocket, border="red")
+draw.circle(3,5,radius=r_rocket, border="red")
+
+draw.circle(4,1,radius=r_rocket, border="red")
+draw.circle(4,2,radius=r_rocket, border="red")
+draw.circle(4,3,radius=r_rocket, border="red")
+draw.circle(4,4,radius=r_rocket, border="red")
+draw.circle(4,5,radius=r_rocket, border="red")
+
+draw.circle(5,1,radius=r_rocket, border="red")
+draw.circle(5,2,radius=r_rocket, border="red")
+draw.circle(5,3,radius=r_rocket, border="red")
+draw.circle(5,4,radius=r_rocket, border="red")
+draw.circle(5,5,radius=r_rocket, border="red")
+
+draw.circle(6,1,radius=r_rocket, border="red")
+draw.circle(6,2,radius=r_rocket, border="red")
+draw.circle(6,3,radius=r_rocket, border="red")
+draw.circle(6,4,radius=r_rocket, border="red")
+draw.circle(6,5,radius=r_rocket, border="red")
+
+draw.circle(7,1,radius=r_rocket, border="red")
+draw.circle(7,2,radius=r_rocket, border="red")
+draw.circle(7,3,radius=r_rocket, border="red")
+draw.circle(7,4,radius=r_rocket, border="red")
+draw.circle(7,5,radius=r_rocket, border="red")
+
+#--------------------------Part b---------------------------------------------------
+
+
