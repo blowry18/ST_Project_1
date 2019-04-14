@@ -84,6 +84,8 @@ draw.ellipse(7,2,R,R, border="red")
 draw.ellipse(7,3,R,R, border="red")
 draw.ellipse(7,4,R,R, border="red")
 draw.ellipse(7,5,R,R, border="red")
+rect(0, 0, 8, 6, border="black")
+grid(NULL,NULL)
 
 #-----------------------------Part b----------------------------------
 
