@@ -88,7 +88,6 @@ rect(0, 0, 8, 6, border="black")
 grid(NULL,NULL)
 
 #-----------------------------Part b----------------------------------
-
 #Redefine given information
 nreps <- 10000
 R <- .85
@@ -150,7 +149,7 @@ for (reps in 1:nreps) {
   y=wy+yy
   # Generate target
   xtgt <- 8*runif(1); ytgt <- 6*runif(1) #Creates x,y coordinates for targets
-  dist <- sqrt((wx-xtgt)^2+(wy-ytgt)^2)
+  dist <- sqrt((x-xtgt)^2+(y-ytgt)^2)
   n = sum(dist<=R)    #number of disks covering the current sample target
   pd <- 1-(1-pdam)^n  #prob. of 1 or more of the n disks neutralizing the target
   PD <- c(PD,pd)        #update the PD vector
@@ -162,7 +161,7 @@ PD_mean_error <- qnorm(.995)*sd(PD)/sqrt(nreps); PD_mean_error
 plot(x,y,xlim=c(-1,9),ylim=c(-1,7),xlab="X Position",ylab="Y Position",xaxs="i",yaxs="i")
 grid(10,8)
 for (i in 1:35){
-    draw.ellipse(x[i],y[i],R,R,border="red")
+  draw.ellipse(x[i],y[i],R,R,border="red")
 }
 text(4,-.5, paste0("99% CI= ", round(PD_mean, 3), " +/- ", round(PD_mean_error, 4)))
 text(4,-.75, paste0("Munition Spacing = 1 (100m), Dispersion SD: 0.15 (15m)"))
@@ -170,6 +169,7 @@ lines(c(0,1,2,3,4,5,6,7,8),rep(0,9))
 lines(c(0,1,2,3,4,5,6,7,8),rep(6,9))
 lines(rep(0,7),c(0,1,2,3,4,5,6))
 lines(rep(8,7),c(0,1,2,3,4,5,6))
+points(wx,wy,pch=3)
 
 #---------------------------Part c.2----------------------------------------
 
@@ -193,7 +193,7 @@ for (j in 1:length(s)) {
   y=wy+yy
   for (reps in 1:nreps) {
     xtgt <- 8*runif(1); ytgt <- 6*runif(1) #Creates x,y coordinates for targets
-    dist <- sqrt((wx-xtgt)^2+(wy-ytgt)^2)
+    dist <- sqrt((x-xtgt)^2+(y-ytgt)^2)
     n = sum(dist<=R)    #number of disks covering the current sample target
     pd <- 1-(1-pdam)^n  #prob. of 1 or more of the n disks neutralizing the target
     PD <- c(PD,pd)        #update the PD vector
@@ -216,9 +216,10 @@ text(1.2,0.83,paste0("n = 10000"))
 lines(s,PD_mean_array+PD_mean_error_array,lty=2,col="red")
 lines(s,PD_mean_array-PD_mean_error_array,lty=2,col="red")
 grid(5,6)
+#varying the spacing doesn't seem to work
 
-#1.15 looks to be the best, run it now
-#redefine given information
+#---------------------------------------------Part c.3 (attempt to get above .94)--------------
+#Define given information
 nreps <- 10000
 R <- .85
 r_rocket <- R
@@ -226,19 +227,22 @@ pdam <- .9
 PD <- NULL
 PD_mean <-NULL
 sd=.15
-s=1.15 #best spacing from above
+s=.2 #extra spacing
+st=.2 # stagger in x
 # Monte Carlo
 for (reps in 1:nreps) {
   # Generate Munitions Coordinates
-  wx = rep(seq(4-3*s,4+3*s,s),5)
-  wy = c(rep(3-2*s,7),rep(3-s,7),rep(3,7),rep(3+s,7),rep(3+2*s,7))
+  wx = c(c(1-2*s,2-2*s,3-s,4,5+s,6+2*s,7+3*s)-st,c(1-2*s,2-2*s,3-s,4,5+s,6+2*s,7+3*s)+st,
+         c(1-2*s,2-2*s,3-s,4,5+s,6+2*s,7+3*s)-st,c(1-2*s,2-2*s,3-s,4,5+s,6+2*s,7+3*s)+st,
+         c(1-2*s,2-2*s,3-s,4,5+s,6+2*s,7+3*s)-st)
+  wy = c(rep(3-2*(s+1),7),rep(3-(s+1),7),rep(3,7),rep(3+(s+1),7),rep(3+2*(s+1),7))
   xx=rnorm(length(wx),mean=0,sd=.15)
   yy=rnorm(length(wy),mean=0,sd=.15)
   x=wx+xx
   y=wy+yy
   # Generate target
   xtgt <- 8*runif(1); ytgt <- 6*runif(1) #Creates x,y coordinates for targets
-  dist <- sqrt((wx-xtgt)^2+(wy-ytgt)^2)
+  dist <- sqrt((x-xtgt)^2+(y-ytgt)^2)
   n = sum(dist<=R)    #number of disks covering the current sample target
   pd <- 1-(1-pdam)^n  #prob. of 1 or more of the n disks neutralizing the target
   PD <- c(PD,pd)        #update the PD vector
@@ -248,17 +252,17 @@ PD_mean <- mean(PD);PD_mean
 PD_mean_error <- qnorm(.995)*sd(PD)/sqrt(nreps); PD_mean_error
 # Plot hits
 plot(x,y,xlim=c(-1,9),ylim=c(-1,7),xlab="X Position",ylab="Y Position",xaxs="i",yaxs="i")
+grid(10,8)
 for (i in 1:35){
   draw.ellipse(x[i],y[i],R,R,border="red")
 }
 text(4,-.5, paste0("99% CI= ", round(PD_mean, 3), " +/- ", round(PD_mean_error, 4)))
-text(4,-.75, paste0("Munition Spacing = 1.15 (115m), Dispersion SD: 0.15 (15m)"))
+text(4,-.75, paste0("Munition Spacing = 1 (100m), Dispersion SD: 0.15 (15m)"))
 lines(c(0,1,2,3,4,5,6,7,8),rep(0,9))
 lines(c(0,1,2,3,4,5,6,7,8),rep(6,9))
 lines(rep(0,7),c(0,1,2,3,4,5,6))
 lines(rep(8,7),c(0,1,2,3,4,5,6))
-grid(10,8)
-
+points(wx,wy,pch=3)
 #--------------------------Part d---------------------------------------------------
 
 #Define given variables
