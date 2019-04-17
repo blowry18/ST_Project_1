@@ -118,7 +118,7 @@ for (j in 1:length(s)) {
   PD_mean <-NULL
 }
 plot(s,PD_mean_array,col="red",
-     xlab="Probability of Damage",ylab="Munition Spacing",
+     ylab="Probability of Damage",xlab="Munition Spacing",
      ylim=c(0.7,1),xaxs="i",yaxs="i")
 lines(s,rep(.94,length(s)))
 text(1.2,0.85, paste0("Max PD 99% CI= ", round(max(PD_mean_array), 3), " +/- ", round(PD_mean_error_array[6], 4)))
@@ -207,7 +207,7 @@ for (j in 1:length(s)) {
   PD_mean <-NULL
 }
 plot(s,PD_mean_array,col="red",
-     xlab="Probability of Damage",ylab="Munition Spacing",
+     ylab="Probability of Damage",xlab="Munition Spacing",
      ylim=c(0.7,1),xaxs="i",yaxs="i")
 lines(s,rep(.94,length(s)))
 text(1.2,0.85, paste0("Max PD 99% CI= ", round(max(PD_mean_array), 3), " +/- ", round(PD_mean_error_array[6], 4)))
