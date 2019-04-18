@@ -5,28 +5,36 @@
 #--------------------------Part a---------------------------------------------------
 library(plotrix)
 #Define given information
-nreps <- 10000
-R <- .85
-r_rocket <- R
-pdam <- .9
+
+#Number of Repetitions
+n <- 10000
+
+#Damage radius of rocket
+r_rocket <- .85
+
+#Probability of Damage if within the Damage Radius
+P_Damage <- .9
+
+#Initiallizing the PD array
 PD <- NULL
 
 #Munition Coordinates
-wx = rep(c(1,2,3,4,5,6,7),5)
-wy = c(rep(1,7),rep(2,7),rep(3,7),rep(4,7),rep(5,7))
+munition_x = rep(c(1,2,3,4,5,6,7),5)
+munition_y = c(rep(1,7),rep(2,7),rep(3,7),rep(4,7),rep(5,7))
 
-#Begin Monte Carlo Simulation for "nreps" of targets with a uniform distrubtion
-for (reps in 1:nreps) {
-  xtgt <- 8*runif(1); ytgt <- 6*runif(1) #Creates x,y coordinates for targets
-  dist <- sqrt((wx-xtgt)^2+(wy-ytgt)^2)
-  n = sum(dist<=R)    #number of disks covering the current sample target
-  pd <- 1-(1-pdam)^n  #prob. of 1 or more of the n disks neutralizing the target
-  PD <- c(PD,pd)        #update the PD vector
+#Begin Monte Carlo Simulation for "n" of targets with a uniform r_targetrubtion
+for (reps in 1:n) {
+  target_x <- 8*runif(1) #Creates 10000 x coordinates for possible targets
+  target_y <- 6*runif(1) #Creates 10000 y coordinates for possible targets
+  r_target <- sqrt((munition_x-target_x)^2+(munition_y-target_y)^2)
+  n_munitions = sum(r_target<=r_rocket)    #Counts number of munitions within a damage radius
+  pd <- 1-(1-P_Damage)^n_munitions  #Probability of 1 or more munitions neutralizating a target
+  PD <- c(PD,pd)        #Updates the Probability of damage vector
 }
 
 #Calculate the 99% Confidence Interval
 PD_mean <- mean(PD);PD_mean
-PD_mean_error <- qnorm(.995)*sd(PD)/sqrt(nreps); PD_mean_error
+PD_mean_error <- qnorm(.995)*sd(PD)/sqrt(n); PD_mean_error
 
 #Plot rocket positions with .85 m*100 coverage
 rockets_x <- c(1,2,3,4,5,6,7)
@@ -43,47 +51,47 @@ points(c(5,5,5,5,5), rockets_y)
 points(c(6,6,6,6,6), rockets_y)
 points(c(7,7,7,7,7), rockets_y)
 
-draw.ellipse(1,1,R,R, border="red")
-draw.ellipse(1,2,R,R, border="red")
-draw.ellipse(1,3,R,R, border="red")
-draw.ellipse(1,4,R,R, border="red")
-draw.ellipse(1,5,R,R, border="red")
+draw.ellipse(1,1,r_rocket,r_rocket, border="red")
+draw.ellipse(1,2,r_rocket,r_rocket, border="red")
+draw.ellipse(1,3,r_rocket,r_rocket, border="red")
+draw.ellipse(1,4,r_rocket,r_rocket, border="red")
+draw.ellipse(1,5,r_rocket,r_rocket, border="red")
 
-draw.ellipse(2,1,R,R, border="red")
-draw.ellipse(2,2,R,R, border="red")
-draw.ellipse(2,3,R,R, border="red")
-draw.ellipse(2,4,R,R, border="red")
-draw.ellipse(2,5,R,R, border="red")
+draw.ellipse(2,1,r_rocket,r_rocket, border="red")
+draw.ellipse(2,2,r_rocket,r_rocket, border="red")
+draw.ellipse(2,3,r_rocket,r_rocket, border="red")
+draw.ellipse(2,4,r_rocket,r_rocket, border="red")
+draw.ellipse(2,5,r_rocket,r_rocket, border="red")
 
-draw.ellipse(3,1,R,R, border="red")
-draw.ellipse(3,2,R,R, border="red")
-draw.ellipse(3,3,R,R, border="red")
-draw.ellipse(3,4,R,R, border="red")
-draw.ellipse(3,5,R,R, border="red")
+draw.ellipse(3,1,r_rocket,r_rocket, border="red")
+draw.ellipse(3,2,r_rocket,r_rocket, border="red")
+draw.ellipse(3,3,r_rocket,r_rocket, border="red")
+draw.ellipse(3,4,r_rocket,r_rocket, border="red")
+draw.ellipse(3,5,r_rocket,r_rocket, border="red")
 
-draw.ellipse(4,1,R,R, border="red")
-draw.ellipse(4,2,R,R, border="red")
-draw.ellipse(4,3,R,R, border="red")
-draw.ellipse(4,4,R,R, border="red")
-draw.ellipse(4,5,R,R, border="red")
+draw.ellipse(4,1,r_rocket,r_rocket, border="red")
+draw.ellipse(4,2,r_rocket,r_rocket, border="red")
+draw.ellipse(4,3,r_rocket,r_rocket, border="red")
+draw.ellipse(4,4,r_rocket,r_rocket, border="red")
+draw.ellipse(4,5,r_rocket,r_rocket, border="red")
 
-draw.ellipse(5,1,R,R, border="red")
-draw.ellipse(5,2,R,R, border="red")
-draw.ellipse(5,3,R,R, border="red")
-draw.ellipse(5,4,R,R, border="red")
-draw.ellipse(5,5,R,R, border="red")
+draw.ellipse(5,1,r_rocket,r_rocket, border="red")
+draw.ellipse(5,2,r_rocket,r_rocket, border="red")
+draw.ellipse(5,3,r_rocket,r_rocket, border="red")
+draw.ellipse(5,4,r_rocket,r_rocket, border="red")
+draw.ellipse(5,5,r_rocket,r_rocket, border="red")
 
-draw.ellipse(6,1,R,R, border="red")
-draw.ellipse(6,2,R,R, border="red")
-draw.ellipse(6,3,R,R, border="red")
-draw.ellipse(6,4,R,R, border="red")
-draw.ellipse(6,5,R,R, border="red")
+draw.ellipse(6,1,r_rocket,r_rocket, border="red")
+draw.ellipse(6,2,r_rocket,r_rocket, border="red")
+draw.ellipse(6,3,r_rocket,r_rocket, border="red")
+draw.ellipse(6,4,r_rocket,r_rocket, border="red")
+draw.ellipse(6,5,r_rocket,r_rocket, border="red")
 
-draw.ellipse(7,1,R,R, border="red")
-draw.ellipse(7,2,R,R, border="red")
-draw.ellipse(7,3,R,R, border="red")
-draw.ellipse(7,4,R,R, border="red")
-draw.ellipse(7,5,R,R, border="red")
+draw.ellipse(7,1,r_rocket,r_rocket, border="red")
+draw.ellipse(7,2,r_rocket,r_rocket, border="red")
+draw.ellipse(7,3,r_rocket,r_rocket, border="red")
+draw.ellipse(7,4,r_rocket,r_rocket, border="red")
+draw.ellipse(7,5,r_rocket,r_rocket, border="red")
 rect(0, 0, 8, 6, border="black")
 grid(NULL,NULL)
 
