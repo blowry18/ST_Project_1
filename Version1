@@ -104,10 +104,6 @@ error <-qnorm(.995)*sd(Pd_all)/sqrt(n_targets)
 
 #Create a plot with the target locations
 plot(target_x, target_y, pch = 19, cex=.1, col="gray", xlim=c(-40,40), ylim=c(-40,40), asp=1, xlab="nm", ylab="nm"); grid()
-text(0,-18, paste0("99% CI= ", round(mean, 4), " +/- ", round(error, 4)))
-text(0,-15, paste0("Num. Sample Targets:", round(n_targets, 4)))
-text(0,-21, paste0("Spacing: 6 nm"))
-
 
 #Mark the targets detected by the sensors within 4 nm
 points(target_x[r1<=r_sono], target_y[r1<=r_sono], col="red", pch=20, cex=.5)
@@ -151,6 +147,10 @@ draw.circle(S6x,S6y,radius=30, border="gray")
 draw.circle(S6x,S6y,radius=31, border="gray")
 draw.circle(S7x,S7y,radius=30, border="gray")
 draw.circle(S7x,S7y,radius=31, border="gray")
+
+text(0,-19, paste0("99% CI= ", round(mean, 4), " +/- ", round(error, 4)))
+text(0,-15, paste0("Num. Sample Targets:", round(n_targets, 4)))
+text(0,-23, paste0("Spacing: 6 nm"))
 
 #Maybe-Board
 #Pick out the coordinates of the detected targets
