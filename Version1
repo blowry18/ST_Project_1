@@ -261,6 +261,305 @@ abline(v=max_spacing, col="gray")
 text(15,.35, paste0("Max Pd (99% CI): ", round(max_pd, 4), " +/- ", round(error, 4)))
 text(15,.33, paste0("n = 10000 at ", round(max_spacing, 4), " nm spacing"))
 
+#-------- Part 1 7nm --------
+library(plotrix)
+mu_x <- 0
+mu_y <- 0
+
+sigma_x <- 15
+sigma_y <- 5
+
+#Number of Sonobuoys
+n_buoys <- 7
+
+#Radius of detection for Sonobuoy
+r_sono <- 4
+
+#Probability of Detection when r<=4 nm
+Pd_DPBB <- .5
+
+#Probability of Detection when 30<r<31 nm
+Pd_CZ <- .9
+
+n_targets <- 10000
+
+#Sonobuoy locations
+
+#Define the length of each side of the hexagon
+L <- 7
+
+S1x <- 0*L
+S1y <- 0*L
+
+S2x <- 0*L
+S2y <- L
+
+S3x <- 0*L
+S3y <- -L
+
+S4x <- L*sqrt(3)/2
+S4y <- L/2
+
+S5x <- L*sqrt(3)/2
+S5y <- -L/2
+
+S6x <- -L*sqrt(3)/2
+S6y <- -L/2
+
+S7x <- -L*sqrt(3)/2
+S7y <- L/2
+
+
+#Produce 1000 Bivariate Normal Random Variables 
+target_x <- rnorm(n_targets,0,sigma_x)
+target_y <- rnorm(n_targets,0,sigma_y)
+
+#Create vectors from center of sensor positon to targets 
+r1<- sqrt((target_x-S1x)^2 +(target_y-S1y)^2)
+r2<- sqrt((target_x-S2x)^2 +(target_y-S2y)^2)
+r3<- sqrt((target_x-S3x)^2 +(target_y-S3y)^2)
+r4<- sqrt((target_x-S4x)^2 +(target_y-S4y)^2)
+r5<- sqrt((target_x-S5x)^2 +(target_y-S5y)^2)
+r6<- sqrt((target_x-S6x)^2 +(target_y-S6y)^2)
+r7<- sqrt((target_x-S7x)^2 +(target_y-S7y)^2)
+
+#Define binary array for all targets within 4 nm of sensors 
+n_possible_detections1 <- (r1<=r_sono)
+n_possible_detections2 <- (r2<=r_sono)
+n_possible_detections3 <- (r3<=r_sono)
+n_possible_detections4 <- (r4<=r_sono)
+n_possible_detections5 <- (r5<=r_sono)
+n_possible_detections6 <- (r6<=r_sono)
+n_possible_detections7 <- (r7<=r_sono)
+
+n_possible_detections <- sum(n_possible_detections1,n_possible_detections2,n_possible_detections3,n_possible_detections4,n_possible_detections5,n_possible_detections6,n_possible_detections7)
+
+#Apply 50% probability of detector for each target within 4 nm 
+Pd_1_DPBB <- Pd_DPBB*(r1<=r_sono)
+Pd_2_DPBB <- Pd_DPBB*(r2<=r_sono)
+Pd_3_DPBB <- Pd_DPBB*(r3<=r_sono)
+Pd_4_DPBB <- Pd_DPBB*(r4<=r_sono)
+Pd_5_DPBB <- Pd_DPBB*(r5<=r_sono)
+Pd_6_DPBB <- Pd_DPBB*(r6<=r_sono)
+Pd_7_DPBB <- Pd_DPBB*(r7<=r_sono)
+
+#Apply 90% probability of detector for each target between 30 and 31 nm
+Pd_1_CZ <- Pd_CZ*(r1<=31 & r1 >=30)
+Pd_2_CZ <- Pd_CZ*(r2<=31 & r2 >=30)
+Pd_3_CZ <- Pd_CZ*(r3<=31 & r3 >=30)
+Pd_4_CZ <- Pd_CZ*(r4<=31 & r4 >=30)
+Pd_5_CZ <- Pd_CZ*(r5<=31 & r5 >=30)
+Pd_6_CZ <- Pd_CZ*(r6<=31 & r6 >=30)
+Pd_7_CZ <- Pd_CZ*(r7<=31 & r7 >=30)
+
+#Create 3rd vector to capture all targets detected. 
+Pd_all <- 1-(1-Pd_1_DPBB)*(1-Pd_2_DPBB)*(1-Pd_3_DPBB)*(1-Pd_4_DPBB)*(1-Pd_5_DPBB)*(1-Pd_6_DPBB)*(1-Pd_7_DPBB)*(1-Pd_1_CZ)*(1-Pd_2_CZ)*(1-Pd_3_CZ)*(1-Pd_4_CZ)*(1-Pd_5_CZ)*(1-Pd_6_CZ)*(1-Pd_7_CZ)
+
+mean <- mean(Pd_all)
+
+#Calculate error within 99% CI (.5% on either side, therefore z.05 or z.95) 
+error <-qnorm(.995)*sd(Pd_all)/sqrt(n_targets) 
+
+
+#Create a plot with the target locations
+plot(target_x, target_y, pch = 19, cex=.1, col="gray", xlim=c(-40,40), ylim=c(-40,40), asp=1, xlab="nm", ylab="nm"); grid()
+
+#Mark the targets detected by the sensors within 4 nm
+points(target_x[r1<=r_sono], target_y[r1<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r2<=r_sono], target_y[r2<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r3<=r_sono], target_y[r3<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r4<=r_sono], target_y[r4<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r5<=r_sono], target_y[r5<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r6<=r_sono], target_y[r6<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r7<=r_sono], target_y[r7<=r_sono], col="red", pch=20, cex=.5)
+
+#Add circles for the sensors
+draw.circle(S1x,S1y,radius=r_sono, border="black")
+draw.circle(S2x,S2y,radius=r_sono, border="black")
+draw.circle(S3x,S3y,radius=r_sono, border="black")
+draw.circle(S4x,S4y,radius=r_sono, border="black")
+draw.circle(S5x,S5y,radius=r_sono, border="black")
+draw.circle(S6x,S6y,radius=r_sono, border="black")
+draw.circle(S7x,S7y,radius=r_sono, border="black")
+
+#Mark the targets detected by the sensors within CZ
+points(target_x[r1<=31 & r1>=30], target_y[r1<=31 & r1>=30], col="red", pch=20, cex=.5)
+points(target_x[r2<=31 & r2>=30], target_y[r2<=31 & r2>=30], col="red", pch=20, cex=.5)
+points(target_x[r3<=31 & r3>=30], target_y[r3<=31 & r3>=30], col="red", pch=20, cex=.5)
+points(target_x[r4<=31 & r4>=30], target_y[r4<=31 & r4>=30], col="red", pch=20, cex=.5)
+points(target_x[r5<=31 & r5>=30], target_y[r5<=31 & r5>=30], col="red", pch=20, cex=.5)
+points(target_x[r6<=31 & r6>=30], target_y[r6<=31 & r6>=30], col="red", pch=20, cex=.5)
+points(target_x[r7<=31 & r7>=30], target_y[r7<=31 & r7>=30], col="red", pch=20, cex=.5)
+
+#Add circles for the sensors at the convergence zone
+draw.circle(S1x,S1y,radius=30, border="gray")
+draw.circle(S1x,S1y,radius=31, border="gray")
+draw.circle(S2x,S2y,radius=30, border="gray")
+draw.circle(S2x,S2y,radius=31, border="gray")
+draw.circle(S3x,S3y,radius=30, border="gray")
+draw.circle(S3x,S3y,radius=31, border="gray")
+draw.circle(S4x,S4y,radius=30, border="gray")
+draw.circle(S4x,S4y,radius=31, border="gray")
+draw.circle(S5x,S5y,radius=30, border="gray")
+draw.circle(S5x,S5y,radius=31, border="gray")
+draw.circle(S6x,S6y,radius=30, border="gray")
+draw.circle(S6x,S6y,radius=31, border="gray")
+draw.circle(S7x,S7y,radius=30, border="gray")
+draw.circle(S7x,S7y,radius=31, border="gray")
+
+text(0,-19, paste0("99% CI= ", round(mean, 4), " +/- ", round(error, 4)))
+text(0,-15, paste0("Num. Sample Targets:", round(n_targets, 4)))
+text(0,-23, paste0("Spacing: 7 nm"))
+
+#------ Part 1 26mm----------------
+library(plotrix)
+mu_x <- 0
+mu_y <- 0
+
+sigma_x <- 15
+sigma_y <- 5
+
+#Number of Sonobuoys
+n_buoys <- 7
+
+#Radius of detection for Sonobuoy
+r_sono <- 4
+
+#Probability of Detection when r<=4 nm
+Pd_DPBB <- .5
+
+#Probability of Detection when 30<r<31 nm
+Pd_CZ <- .9
+
+n_targets <- 10000
+
+#Sonobuoy locations
+
+#Define the length of each side of the hexagon
+L <- 26
+
+S1x <- 0*L
+S1y <- 0*L
+
+S2x <- 0*L
+S2y <- L
+
+S3x <- 0*L
+S3y <- -L
+
+S4x <- L*sqrt(3)/2
+S4y <- L/2
+
+S5x <- L*sqrt(3)/2
+S5y <- -L/2
+
+S6x <- -L*sqrt(3)/2
+S6y <- -L/2
+
+S7x <- -L*sqrt(3)/2
+S7y <- L/2
+
+
+#Produce 1000 Bivariate Normal Random Variables 
+target_x <- rnorm(n_targets,0,sigma_x)
+target_y <- rnorm(n_targets,0,sigma_y)
+
+#Create vectors from center of sensor positon to targets 
+r1<- sqrt((target_x-S1x)^2 +(target_y-S1y)^2)
+r2<- sqrt((target_x-S2x)^2 +(target_y-S2y)^2)
+r3<- sqrt((target_x-S3x)^2 +(target_y-S3y)^2)
+r4<- sqrt((target_x-S4x)^2 +(target_y-S4y)^2)
+r5<- sqrt((target_x-S5x)^2 +(target_y-S5y)^2)
+r6<- sqrt((target_x-S6x)^2 +(target_y-S6y)^2)
+r7<- sqrt((target_x-S7x)^2 +(target_y-S7y)^2)
+
+#Define binary array for all targets within 4 nm of sensors 
+n_possible_detections1 <- (r1<=r_sono)
+n_possible_detections2 <- (r2<=r_sono)
+n_possible_detections3 <- (r3<=r_sono)
+n_possible_detections4 <- (r4<=r_sono)
+n_possible_detections5 <- (r5<=r_sono)
+n_possible_detections6 <- (r6<=r_sono)
+n_possible_detections7 <- (r7<=r_sono)
+
+n_possible_detections <- sum(n_possible_detections1,n_possible_detections2,n_possible_detections3,n_possible_detections4,n_possible_detections5,n_possible_detections6,n_possible_detections7)
+
+#Apply 50% probability of detector for each target within 4 nm 
+Pd_1_DPBB <- Pd_DPBB*(r1<=r_sono)
+Pd_2_DPBB <- Pd_DPBB*(r2<=r_sono)
+Pd_3_DPBB <- Pd_DPBB*(r3<=r_sono)
+Pd_4_DPBB <- Pd_DPBB*(r4<=r_sono)
+Pd_5_DPBB <- Pd_DPBB*(r5<=r_sono)
+Pd_6_DPBB <- Pd_DPBB*(r6<=r_sono)
+Pd_7_DPBB <- Pd_DPBB*(r7<=r_sono)
+
+#Apply 90% probability of detector for each target between 30 and 31 nm
+Pd_1_CZ <- Pd_CZ*(r1<=31 & r1 >=30)
+Pd_2_CZ <- Pd_CZ*(r2<=31 & r2 >=30)
+Pd_3_CZ <- Pd_CZ*(r3<=31 & r3 >=30)
+Pd_4_CZ <- Pd_CZ*(r4<=31 & r4 >=30)
+Pd_5_CZ <- Pd_CZ*(r5<=31 & r5 >=30)
+Pd_6_CZ <- Pd_CZ*(r6<=31 & r6 >=30)
+Pd_7_CZ <- Pd_CZ*(r7<=31 & r7 >=30)
+
+#Create 3rd vector to capture all targets detected. 
+Pd_all <- 1-(1-Pd_1_DPBB)*(1-Pd_2_DPBB)*(1-Pd_3_DPBB)*(1-Pd_4_DPBB)*(1-Pd_5_DPBB)*(1-Pd_6_DPBB)*(1-Pd_7_DPBB)*(1-Pd_1_CZ)*(1-Pd_2_CZ)*(1-Pd_3_CZ)*(1-Pd_4_CZ)*(1-Pd_5_CZ)*(1-Pd_6_CZ)*(1-Pd_7_CZ)
+
+mean <- mean(Pd_all)
+
+#Calculate error within 99% CI (.5% on either side, therefore z.05 or z.95) 
+error <-qnorm(.995)*sd(Pd_all)/sqrt(n_targets) 
+
+
+#Create a plot with the target locations
+plot(target_x, target_y, pch = 19, cex=.1, col="gray", xlim=c(-40,40), ylim=c(-40,40), asp=1, xlab="nm", ylab="nm"); grid()
+
+#Mark the targets detected by the sensors within 4 nm
+points(target_x[r1<=r_sono], target_y[r1<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r2<=r_sono], target_y[r2<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r3<=r_sono], target_y[r3<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r4<=r_sono], target_y[r4<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r5<=r_sono], target_y[r5<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r6<=r_sono], target_y[r6<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r7<=r_sono], target_y[r7<=r_sono], col="red", pch=20, cex=.5)
+
+#Add circles for the sensors
+draw.circle(S1x,S1y,radius=r_sono, border="black")
+draw.circle(S2x,S2y,radius=r_sono, border="black")
+draw.circle(S3x,S3y,radius=r_sono, border="black")
+draw.circle(S4x,S4y,radius=r_sono, border="black")
+draw.circle(S5x,S5y,radius=r_sono, border="black")
+draw.circle(S6x,S6y,radius=r_sono, border="black")
+draw.circle(S7x,S7y,radius=r_sono, border="black")
+
+#Mark the targets detected by the sensors within CZ
+points(target_x[r1<=31 & r1>=30], target_y[r1<=31 & r1>=30], col="red", pch=20, cex=.5)
+points(target_x[r2<=31 & r2>=30], target_y[r2<=31 & r2>=30], col="red", pch=20, cex=.5)
+points(target_x[r3<=31 & r3>=30], target_y[r3<=31 & r3>=30], col="red", pch=20, cex=.5)
+points(target_x[r4<=31 & r4>=30], target_y[r4<=31 & r4>=30], col="red", pch=20, cex=.5)
+points(target_x[r5<=31 & r5>=30], target_y[r5<=31 & r5>=30], col="red", pch=20, cex=.5)
+points(target_x[r6<=31 & r6>=30], target_y[r6<=31 & r6>=30], col="red", pch=20, cex=.5)
+points(target_x[r7<=31 & r7>=30], target_y[r7<=31 & r7>=30], col="red", pch=20, cex=.5)
+
+#Add circles for the sensors at the convergence zone
+draw.circle(S1x,S1y,radius=30, border="gray")
+draw.circle(S1x,S1y,radius=31, border="gray")
+draw.circle(S2x,S2y,radius=30, border="gray")
+draw.circle(S2x,S2y,radius=31, border="gray")
+draw.circle(S3x,S3y,radius=30, border="gray")
+draw.circle(S3x,S3y,radius=31, border="gray")
+draw.circle(S4x,S4y,radius=30, border="gray")
+draw.circle(S4x,S4y,radius=31, border="gray")
+draw.circle(S5x,S5y,radius=30, border="gray")
+draw.circle(S5x,S5y,radius=31, border="gray")
+draw.circle(S6x,S6y,radius=30, border="gray")
+draw.circle(S6x,S6y,radius=31, border="gray")
+draw.circle(S7x,S7y,radius=30, border="gray")
+draw.circle(S7x,S7y,radius=31, border="gray")
+
+text(0,-19, paste0("99% CI= ", round(mean, 4), " +/- ", round(error, 4)))
+text(0,-15, paste0("Num. Sample Targets:", round(n_targets, 4)))
+text(0,-23, paste0("Spacing: 26 nm"))
 
 #--------Part 2----------------
 #--------Part 2.1 Linear----------------
@@ -748,4 +1047,253 @@ abline(v=max_spacing, col="gray")
 text(10,.15, paste0("Max Pd (99% CI): ", round(max_pd, 4), " +/- ", round(error, 4)))
 text(10,.13, paste0("n = 10000 at ", round(max_spacing, 4), " nm spacing in X"))
 text(10,.11, paste0(2*j," nm spacing in Y"))
+}
+
+# ------ trying to get to .38-------
+
+library(plotrix)
+mu_x <- 0
+mu_y <- 0
+
+sigma_x <- 15
+sigma_y <- 5
+
+#Number of Sonobuoys
+n_buoys <- 7
+
+#Radius of detection for Sonobuoy
+r_sono <- 4
+
+#Probability of Detection when r<=4 nm
+Pd_DPBB <- .5
+
+#Probability of Detection when 30<r<31 nm
+Pd_CZ <- .9
+
+n_targets <- 10000
+
+#Sonobuoy locations
+
+#Define the length of each side of the hexagon
+sp <- 7 # spacing
+spy <- 26
+
+S1x <- 0
+S1y <- spy
+
+S2x <- 1*sp
+S2y <- spy
+
+S3x <- -1*sp
+S3y <- spy
+
+S4x <- .5*sp
+S4y <- -spy
+
+S5x <- -.5*sp
+S5y <- -spy
+
+S6x <- -1.5*sp
+S6y <- -spy
+
+S7x <- 1.5*sp
+S7y <- -spy
+
+
+#Produce 1000 Bivariate Normal Random Variables 
+target_x <- rnorm(n_targets,0,sigma_x)
+target_y <- rnorm(n_targets,0,sigma_y)
+
+#Create vectors from center of sensor positon to targets 
+r1<- sqrt((target_x-S1x)^2 +(target_y-S1y)^2)
+r2<- sqrt((target_x-S2x)^2 +(target_y-S2y)^2)
+r3<- sqrt((target_x-S3x)^2 +(target_y-S3y)^2)
+r4<- sqrt((target_x-S4x)^2 +(target_y-S4y)^2)
+r5<- sqrt((target_x-S5x)^2 +(target_y-S5y)^2)
+r6<- sqrt((target_x-S6x)^2 +(target_y-S6y)^2)
+r7<- sqrt((target_x-S7x)^2 +(target_y-S7y)^2)
+
+#Define binary array for all targets within 4 nm of sensors 
+n_possible_detections1 <- (r1<=r_sono)
+n_possible_detections2 <- (r2<=r_sono)
+n_possible_detections3 <- (r3<=r_sono)
+n_possible_detections4 <- (r4<=r_sono)
+n_possible_detections5 <- (r5<=r_sono)
+n_possible_detections6 <- (r6<=r_sono)
+n_possible_detections7 <- (r7<=r_sono)
+
+n_possible_detections <- sum(n_possible_detections1,n_possible_detections2,n_possible_detections3,n_possible_detections4,n_possible_detections5,n_possible_detections6,n_possible_detections7)
+
+#Apply 50% probability of detector for each target within 4 nm 
+Pd_1_DPBB <- Pd_DPBB*(r1<=r_sono)
+Pd_2_DPBB <- Pd_DPBB*(r2<=r_sono)
+Pd_3_DPBB <- Pd_DPBB*(r3<=r_sono)
+Pd_4_DPBB <- Pd_DPBB*(r4<=r_sono)
+Pd_5_DPBB <- Pd_DPBB*(r5<=r_sono)
+Pd_6_DPBB <- Pd_DPBB*(r6<=r_sono)
+Pd_7_DPBB <- Pd_DPBB*(r7<=r_sono)
+
+#Apply 90% probability of detector for each target between 30 and 31 nm
+Pd_1_CZ <- Pd_CZ*(r1<=31 & r1 >=30)
+Pd_2_CZ <- Pd_CZ*(r2<=31 & r2 >=30)
+Pd_3_CZ <- Pd_CZ*(r3<=31 & r3 >=30)
+Pd_4_CZ <- Pd_CZ*(r4<=31 & r4 >=30)
+Pd_5_CZ <- Pd_CZ*(r5<=31 & r5 >=30)
+Pd_6_CZ <- Pd_CZ*(r6<=31 & r6 >=30)
+Pd_7_CZ <- Pd_CZ*(r7<=31 & r7 >=30)
+
+#Create 3rd vector to capture all targets detected. 
+Pd_all <- 1-(1-Pd_1_DPBB)*(1-Pd_2_DPBB)*(1-Pd_3_DPBB)*(1-Pd_4_DPBB)*(1-Pd_5_DPBB)*(1-Pd_6_DPBB)*(1-Pd_7_DPBB)*(1-Pd_1_CZ)*(1-Pd_2_CZ)*(1-Pd_3_CZ)*(1-Pd_4_CZ)*(1-Pd_5_CZ)*(1-Pd_6_CZ)*(1-Pd_7_CZ)
+
+mean <- mean(Pd_all)
+
+#Calculate error within 99% CI (.5% on either side, therefore z.05 or z.95) 
+error <-qnorm(.995)*sd(Pd_all)/sqrt(n_targets) 
+
+
+#Create a plot with the target locations
+plot(target_x, target_y, pch = 19, cex=.1, col="gray", xlim=c(-40,40), ylim=c(-40,40), asp=1, xlab="nm", ylab="nm"); grid()
+
+#Mark the targets detected by the sensors within 4 nm
+points(target_x[r1<=r_sono], target_y[r1<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r2<=r_sono], target_y[r2<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r3<=r_sono], target_y[r3<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r4<=r_sono], target_y[r4<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r5<=r_sono], target_y[r5<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r6<=r_sono], target_y[r6<=r_sono], col="red", pch=20, cex=.5)
+points(target_x[r7<=r_sono], target_y[r7<=r_sono], col="red", pch=20, cex=.5)
+
+#Add circles for the sensors
+draw.circle(S1x,S1y,radius=r_sono, border="black")
+draw.circle(S2x,S2y,radius=r_sono, border="black")
+draw.circle(S3x,S3y,radius=r_sono, border="black")
+draw.circle(S4x,S4y,radius=r_sono, border="black")
+draw.circle(S5x,S5y,radius=r_sono, border="black")
+draw.circle(S6x,S6y,radius=r_sono, border="black")
+draw.circle(S7x,S7y,radius=r_sono, border="black")
+
+#Mark the targets detected by the sensors within CZ
+points(target_x[r1<=31 & r1>=30], target_y[r1<=31 & r1>=30], col="red", pch=20, cex=.5)
+points(target_x[r2<=31 & r2>=30], target_y[r2<=31 & r2>=30], col="red", pch=20, cex=.5)
+points(target_x[r3<=31 & r3>=30], target_y[r3<=31 & r3>=30], col="red", pch=20, cex=.5)
+points(target_x[r4<=31 & r4>=30], target_y[r4<=31 & r4>=30], col="red", pch=20, cex=.5)
+points(target_x[r5<=31 & r5>=30], target_y[r5<=31 & r5>=30], col="red", pch=20, cex=.5)
+points(target_x[r6<=31 & r6>=30], target_y[r6<=31 & r6>=30], col="red", pch=20, cex=.5)
+points(target_x[r7<=31 & r7>=30], target_y[r7<=31 & r7>=30], col="red", pch=20, cex=.5)
+
+#Add circles for the sensors at the convergence zone
+draw.circle(S1x,S1y,radius=30, border="gray")
+draw.circle(S1x,S1y,radius=31, border="gray")
+draw.circle(S2x,S2y,radius=30, border="gray")
+draw.circle(S2x,S2y,radius=31, border="gray")
+draw.circle(S3x,S3y,radius=30, border="gray")
+draw.circle(S3x,S3y,radius=31, border="gray")
+draw.circle(S4x,S4y,radius=30, border="gray")
+draw.circle(S4x,S4y,radius=31, border="gray")
+draw.circle(S5x,S5y,radius=30, border="gray")
+draw.circle(S5x,S5y,radius=31, border="gray")
+draw.circle(S6x,S6y,radius=30, border="gray")
+draw.circle(S6x,S6y,radius=31, border="gray")
+draw.circle(S7x,S7y,radius=30, border="gray")
+draw.circle(S7x,S7y,radius=31, border="gray")
+
+text(0,-19, paste0("99% CI= ", round(mean, 4), " +/- ", round(error, 4)))
+text(0,-15, paste0("Num. Sample Targets:", round(n_targets, 4)))
+text(0,-32, paste0("Array Spacing: ", sp," nm"))
+text(0,-36, paste0("Array Offset in Y: ", spy," nm"))
+
+# vary spacing
+#Varying the Buoy spacing
+Ly <- seq(25,28,.25)
+for (j in 1:length(Ly)) { 
+  Lx <- seq(0,20,1)
+  
+  mean_out <- NULL
+  
+  for (i in 1:length(Lx)) {
+    #Define the length of each side of the hexagon
+    
+    sp <-  Lx[i]# spacing
+    spy <- Ly[j]
+    
+    S1x <- 0
+    S1y <- spy
+    
+    S2x <- 1*sp
+    S2y <- spy
+    
+    S3x <- -1*sp
+    S3y <- spy
+    
+    S4x <- .5*sp
+    S4y <- -spy
+    
+    S5x <- -.5*sp
+    S5y <- -spy
+    
+    S6x <- -1.5*sp
+    S6y <- -spy
+    
+    S7x <- 1.5*sp
+    S7y <- -spy
+    
+    #Create vectors from center of sensor positon to targets 
+    r1<- sqrt((target_x-S1x)^2 +(target_y-S1y)^2)
+    r2<- sqrt((target_x-S2x)^2 +(target_y-S2y)^2)
+    r3<- sqrt((target_x-S3x)^2 +(target_y-S3y)^2)
+    r4<- sqrt((target_x-S4x)^2 +(target_y-S4y)^2)
+    r5<- sqrt((target_x-S5x)^2 +(target_y-S5y)^2)
+    r6<- sqrt((target_x-S6x)^2 +(target_y-S6y)^2)
+    r7<- sqrt((target_x-S7x)^2 +(target_y-S7y)^2)
+    
+    #Define binary array for all targets within 4 nm of sensors 
+    n_possible_detections1 <- (r1<=r_sono)
+    n_possible_detections2 <- (r2<=r_sono)
+    n_possible_detections3 <- (r3<=r_sono)
+    n_possible_detections4 <- (r4<=r_sono)
+    n_possible_detections5 <- (r5<=r_sono)
+    n_possible_detections6 <- (r6<=r_sono)
+    n_possible_detections7 <- (r7<=r_sono)
+    
+    n_possible_detections <- sum(n_possible_detections1,n_possible_detections2,n_possible_detections3,n_possible_detections4,n_possible_detections5,n_possible_detections6,n_possible_detections7)
+    
+    #Apply 50% probability of detector for each target within 4 nm 
+    Pd_1_DPBB <- Pd_DPBB*(r1<=r_sono)
+    Pd_2_DPBB <- Pd_DPBB*(r2<=r_sono)
+    Pd_3_DPBB <- Pd_DPBB*(r3<=r_sono)
+    Pd_4_DPBB <- Pd_DPBB*(r4<=r_sono)
+    Pd_5_DPBB <- Pd_DPBB*(r5<=r_sono)
+    Pd_6_DPBB <- Pd_DPBB*(r6<=r_sono)
+    Pd_7_DPBB <- Pd_DPBB*(r7<=r_sono)
+    
+    #Apply 90% probability of detector for each target between 30 and 31 nm
+    Pd_1_CZ <- Pd_CZ*(r1<=31 & r1 >=30)
+    Pd_2_CZ <- Pd_CZ*(r2<=31 & r2 >=30)
+    Pd_3_CZ <- Pd_CZ*(r3<=31 & r3 >=30)
+    Pd_4_CZ <- Pd_CZ*(r4<=31 & r4 >=30)
+    Pd_5_CZ <- Pd_CZ*(r5<=31 & r5 >=30)
+    Pd_6_CZ <- Pd_CZ*(r6<=31 & r6 >=30)
+    Pd_7_CZ <- Pd_CZ*(r7<=31 & r7 >=30)
+    
+    #Create vector to capture all targets detected. 
+    Pd_all <- 1-(1-Pd_1_DPBB)*(1-Pd_2_DPBB)*(1-Pd_3_DPBB)*(1-Pd_4_DPBB)*(1-Pd_5_DPBB)*(1-Pd_6_DPBB)*(1-Pd_7_DPBB)*(1-Pd_1_CZ)*(1-Pd_2_CZ)*(1-Pd_3_CZ)*(1-Pd_4_CZ)*(1-Pd_5_CZ)*(1-Pd_6_CZ)*(1-Pd_7_CZ)
+    
+    mean_new <- mean(Pd_all)
+    mean_out <- c(mean_out,mean_new)
+    
+  }
+  
+  #Calculate error within 99% CI  
+  error <-qnorm(.995)*sd(Pd_all)/sqrt(n_targets) 
+  
+  plot(Lx,mean_out,pch = 19, cex=1, col="red", xlim=c(0,20), ylim=c(0,.4), xlab="Array Spacing in X (nm)", ylab="Pd"); grid()
+  max_pd <- max(mean_out[2:length(mean_out)])
+  max_spacing <- Lx[which(mean_out == max_pd)]
+  lines(Lx,mean_out+error,lty=2,col="red")
+  lines(Lx,mean_out-error,lty=2,col="red")
+  abline(h=max_pd, col="gray")
+  abline(v=max_spacing, col="gray")
+  text(10,.15, paste0("Max Pd (99% CI): ", round(max_pd, 4), " +/- ", round(error, 4)))
+  text(10,.13, paste0("n = 10000 at ", round(max_spacing, 4), " nm spacing in X"))
+  text(10,.11, paste0(Ly[j]," nm offset in Y"))
 }
